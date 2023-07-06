@@ -1,5 +1,5 @@
 from models import *
-
+from typing import List
 
 class SupplierDAO:
     @staticmethod
@@ -16,6 +16,16 @@ class SupplierDAO:
     @staticmethod
     def get_all_suppliers():
         return Supplier.query.all()
+    
+    @staticmethod
+    def get_products_by_consumer_id(consumer_id: int) -> List[Product]:
+        # Fetch products associated with a specific consumer ID from the database
+        # and return a list of Product objects
+        products = Product.query \
+            .join(ConsumerOrder, ConsumerOrder.product_id == Product.id) \
+            .filter(ConsumerOrder.consumer_id == consumer_id) \
+            .all()
+        return products
 
     @staticmethod
     def update_supplier(supplier_id, name=None, address=None, contact=None):

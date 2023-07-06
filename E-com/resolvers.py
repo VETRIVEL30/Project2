@@ -270,7 +270,7 @@
 
 import strawberry
 from typing import List
-from dao import (
+ from dao import (
     SupplierDAO,
     ProductDAO,
     StockDAO,
@@ -291,14 +291,30 @@ class Supplier:
     supplier_orders: List['SupplierOrder']
     supplier_transactions: List['SupplierTransaction']
 
-    def resolve_products(self, info) -> List['Product']:
+    @strawberry.field
+    def products(self, info) -> List['Product']:
         return ProductDAO.get_products_by_supplier_id(self.id)
 
-    def resolve_supplier_orders(self, info) -> List['SupplierOrder']:
+    @strawberry.field
+    def supplier_orders(self, info) -> List['SupplierOrder']:
         return SupplierOrderDAO.get_supplier_orders_by_supplier_id(self.id)
 
-    def resolve_supplier_transactions(self, info) -> List['SupplierTransaction']:
+    @strawberry.field
+    def supplier_transactions(self, info) -> List['SupplierTransaction']:
         return SupplierTransactionDAO.get_supplier_transactions_by_supplier_id(self.id)
+
+    @strawberry.field
+    def transaction_count(self, info) -> int:
+        return len(self.supplier_transactions)
+
+    @strawberry.field
+    def supplier_order_count(self, info) -> int:
+        return len(self.supplier_orders)
+
+    @strawberry.field
+    def product_count(self, info) -> int:
+        return len(self.products)
+    
 
 @strawberry.type
 class Product:
@@ -323,6 +339,19 @@ class Product:
     def resolve_consumer_orders(self, info) -> List['ConsumerOrder']:
         return ConsumerOrderDAO.get_consumer_orders_by_product_id(self.id)
 
+    @strawberry.field
+    def supplier_order_count(self, info) -> int:
+        return len(self.supplier_orders)
+
+    @strawberry.field
+    def stock_count(self, info) -> int:
+        return len(self.stocks)
+
+    @strawberry.field
+    def consumer_order_count(self, info) -> int:
+        return len(self.consumer_orders)
+    
+
 @strawberry.type
 class Stock:
     id: int
@@ -342,6 +371,15 @@ class Stock:
     def resolve_consumer_transactions(self, info) -> List['ConsumerTransaction']:
         return ConsumerTransactionDAO.get_consumer_transactions_by_stock_id(self.id)
 
+    @strawberry.field
+    def supplier_order_count(self, info) -> int:
+        return len(self.supplier_orders)
+
+    @strawberry.field
+    def consumer_transaction_count(self, info) -> int:
+        return len(self.consumer_transactions)
+    
+ 
 @strawberry.type
 class SupplierOrder:
     id: int
@@ -353,7 +391,7 @@ class SupplierOrder:
     order_date: str
     supplier: Supplier
     product: Product
-    stock: Stock
+    stock: List[Stock]
 
     def resolve_supplier(self, info) -> Supplier:
         return SupplierDAO.get_supplier_by_id(self.supplier_id)
@@ -361,8 +399,12 @@ class SupplierOrder:
     def resolve_product(self, info) -> Product:
         return ProductDAO.get_product_by_id(self.product_id)
 
-    def resolve_stock(self, info) -> Stock:
+    def resolve_stock(self, info) -> List[Stock]:
         return StockDAO.get_stock_by_id(self.stock_id)
+
+    @strawberry.field
+    def stock_length(self, info) -> int:
+        return len(self.stock)
 
 @strawberry.type
 class SupplierTransaction:
@@ -379,6 +421,40 @@ class SupplierTransaction:
 
     def resolve_order(self, info) -> SupplierOrder:
         return SupplierOrderDAO.get_supplier_order_by_id(self.order_id)
+
+    @classmethod
+    def transaction_count(cls, info) -> int:
+        return SupplierTransactionDAO.get_supplier_transaction_count()
+@strawberry.type
+class Consumer:
+    id: int
+    name: str
+    address: str
+    contact: str
+    products: List[Product]
+    consumer_orders: List['ConsumerOrder']
+    consumer_transactions: List['ConsumerTransaction']
+
+    def resolve_products(self, info) -> List[Product]:
+        return ProductDAO.get_products_by_consumer_id(self.id)
+
+    def resolve_consumer_orders(self, info) -> List['ConsumerOrder']:
+        return ConsumerOrderDAO.get_consumer_orders_by_consumer_id(self.id)
+
+    def resolve_consumer_transactions(self, info) -> List['ConsumerTransaction']:
+        return ConsumerTransactionDAO.get_consumer_transactions_by_consumer_id(self.id)
+
+    @strawberry.field
+    def consumer_order_count(self, info) -> int:
+        return len(self.consumer_orders)
+
+    @strawberry.field
+    def product_count(self, info) -> int:
+        return len(self.products)
+
+    @strawberry.field
+    def consumer_transaction_count(self, info) -> int:
+        return len(self.consumer_transactions)
 
 @strawberry.type
 class Consumer:
@@ -399,23 +475,13 @@ class Consumer:
     def resolve_consumer_transactions(self, info) -> List['ConsumerTransaction']:
         return ConsumerTransactionDAO.get_consumer_transactions_by_consumer_id(self.id)
 
-@strawberry.type
-class ConsumerOrder:
-    id: int
-    consumer_id: int
-    product_id: int
-    quantity: int
-    total_price: float
-    order_date: str
-    consumer: Consumer
-    product: Product
+    @strawberry.field
+    def consumer_order_count(self, info) -> int:
+        return len(self.consumer_orders)
 
-    def resolve_consumer(self, info) -> Consumer:
-        return ConsumerDAO.get_consumer_by_id(self.consumer_id)
-
-    def resolve_product(self, info) -> Product:
-        return ProductDAO.get_product_by_id(self.product_id)
-
+    @strawberry.field
+    def product_count(self, info) -> int:
+        return len(self.products)
 @strawberry.type
 class ConsumerTransaction:
     id: int
@@ -437,6 +503,13 @@ class ConsumerTransaction:
     def resolve_stock(self, info) -> Stock:
         return StockDAO.get_stock_by_id(self.stock_id)
 
+    @strawberry.field
+    def consumer_transaction_count(self, info) -> int:
+        return len(self.consumer.consumer_transactions)
+
+    @strawberry.field
+    def order_count(self, info) -> int:
+        return len(self.order.consumer.consumer_orders)
 
 @strawberry.type
 class Query:
@@ -471,6 +544,39 @@ class Query:
     @strawberry.field
     def all_consumer_transactions(self) -> List[ConsumerTransaction]:
         return ConsumerTransactionDAO.get_all_consumer_transactions()
+    
+    @strawberry.field
+    def supplier(self, supplier_id: int) -> Supplier:
+        return SupplierDAO.get_supplier_by_id(supplier_id)
+
+    @strawberry.field
+    def product(self, product_id: int) -> Product:
+        return ProductDAO.get_product_by_id(product_id)
+
+    @strawberry.field
+    def stock(self, stock_id: int) -> Stock:
+        return StockDAO.get_stock_by_id(stock_id)
+
+    @strawberry.field
+    def supplier_order(self, order_id: int) -> SupplierOrder:
+        return SupplierOrderDAO.get_supplier_order_by_id(order_id)
+
+    @strawberry.field
+    def supplier_transaction(self, transaction_id: int) -> SupplierTransaction:
+        return SupplierTransactionDAO.get_supplier_transaction_by_id(transaction_id)
+
+    @strawberry.field
+    def consumer(self, consumer_id: int) -> Consumer:
+        return ConsumerDAO.get_consumer_by_id(consumer_id)
+
+    @strawberry.field
+    def consumer_order(self, order_id: int) -> ConsumerOrder:
+        return ConsumerOrderDAO.get_consumer_order_by_id(order_id)
+
+    @strawberry.field
+    def consumer_transaction(self, transaction_id: int) -> ConsumerTransaction:
+        return ConsumerTransactionDAO.get_consumer_transaction_by_id(transaction_id)
+
 
 
 @strawberry.type
