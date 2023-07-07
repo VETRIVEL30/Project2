@@ -5,7 +5,7 @@ from strawberry.flask.views import GraphQLView
 # from models import *
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Password0#@database1.cuetvdodk2bh.us-east-1.rds.amazonaws.com/e_commerce?port=5432'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Password0#@database1.cuetvdodk2bh.us-east-1.rds.amazonaws.com/ecom?port=5432'
 
 # Initialize the database
 db.init_app(app)
