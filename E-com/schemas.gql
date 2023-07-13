@@ -1,0 +1,130 @@
+type Supplier {
+  supplier_id: Int!
+  name: String!
+  address: String!
+  contact: String!
+  email: String!
+}
+
+type Product {
+  product_id: Int!
+  name: String!
+  description: String!
+  price: Float!
+}
+
+type Stock {
+  stock_id: Int!
+  product_id: Int!
+  quantity: Int!
+  location: String!
+  threshold: Int!
+}
+
+type SupplierOrder {
+  order_id: Int!
+  supplier: Supplier!
+  product: Product!
+  stock: Stock!
+  quantity: Int!
+  order_date: String!
+  total_price: Float!
+  calculate_total_price: Float!
+}
+
+type Consumer {
+  consumer_id: Int!
+  name: String!
+  address: String!
+  contact: String!
+  email: String!
+}
+
+type ConsumerOrder {
+  order_id: Int!
+  consumer: Consumer!
+  product: Product!
+  quantity: Int!
+  order_date: String!
+}
+
+type ConsumerTransaction {
+  transaction_id: Int!
+  consumer: Consumer!
+  order: ConsumerOrder!
+  amount: Float!
+  transaction_date: String!
+  consumer_id: Int!
+  order_id: Int!
+}
+
+type SupplierTransaction {
+  transaction_id: Int!
+  supplier: Supplier!
+  order: SupplierOrder!
+  transaction_date: String!
+  amount: Float!
+}
+
+type Query {
+  get_supplier_by_id(supplier_id: Int!): Supplier
+  get_all_suppliers: [Supplier]
+  get_product_by_id(product_id: Int!): Product
+  get_all_products: [Product]
+  get_stock_by_id(stock_id: Int!): Stock
+  get_all_stocks: [Stock]
+  get_supplier_order_by_id(order_id: Int!): SupplierOrder
+  get_all_supplier_orders: [SupplierOrder]
+  get_orders_by_supplier_id(supplier_id: Int!): [SupplierOrder]
+  get_suppliers_by_order_id(order_id: Int!): [Supplier]
+  get_consumer_by_id(consumer_id: Int!): Consumer
+  get_all_consumers: [Consumer]
+  get_consumer_order_by_id(order_id: Int!): ConsumerOrder
+  get_all_consumer_orders: [ConsumerOrder]
+  get_supplier_transaction_by_id(transaction_id: Int!): SupplierTransaction
+  get_all_supplier_transactions: [SupplierTransaction]
+  get_transactions_by_supplier_id(supplier_id: Int!): [SupplierTransaction]
+  get_supplier_by_transaction_id(transaction_id: Int!): Supplier
+  get_order_by_transaction_id(transaction_id: Int!): SupplierOrder
+  get_transaction_by_order_id(order_id: Int!): SupplierTransaction
+  get_orders_by_consumer_id(consumer_id: Int!): [ConsumerOrder]
+  get_consumers_by_order_id(order_id: Int!): [Consumer]
+  get_consumer_transaction_by_id(transaction_id: Int!): ConsumerTransaction
+  get_all_consumer_transactions: [ConsumerTransaction]
+  get_transactions_by_consumer_id(consumer_id: Int!): [ConsumerTransaction]
+  get_consumer_by_transaction_id(transaction_id: Int!): Consumer
+  get_order_by_transaction_id(transaction_id: Int!): ConsumerOrder
+  get_transaction_by_order_id(order_id: Int!): ConsumerTransaction
+}
+
+type Mutation {
+  create_supplier(name: String!, address: String!, contact: String!, email: String!): Supplier
+  update_supplier(supplier_id: Int!, name: String, address: String, contact: String, email: String): Supplier
+  delete_supplier(supplier_id: Int!): Supplier
+  create_product(name: String!, description: String!, price: Float!): Product
+  update_product(product_id: Int!, name: String, description: String, price: Float): Product
+  delete_product(product_id: Int!): Product
+  create_stock(product_id: Int!, quantity: Int!, location: String!, threshold: Int!): Stock
+  update_stock(stock_id: Int!, quantity: Int, location: String, threshold: Int): Stock
+  delete_stock(stock_id: Int!): Stock
+  create_supplier_order(supplier_id: Int!, product_id: Int!, stock_id: Int!, quantity: Int!, order_date: String!): SupplierOrder
+  update_supplier_order(order_id: Int!, quantity: Int, order_date: String): SupplierOrder
+  delete_supplier_order(order_id: Int!): SupplierOrder
+  create_consumer(name: String!, address: String!, contact: String!, email: String!): Consumer
+  update_consumer(consumer_id: Int!, name: String, address: String, contact: String, email: String): Consumer
+  delete_consumer(consumer_id: Int!): Consumer
+  create_consumer_order(consumer_id: Int!, product_id: Int!, quantity: Int!, order_date: String!): ConsumerOrder
+  update_consumer_order(order_id: Int!, quantity: Int, order_date: String): ConsumerOrder
+  delete_consumer_order(order_id: Int!): ConsumerOrder
+  create_supplier_transaction(supplier_id: Int!, order_id: Int!, transaction_date: String!): SupplierTransaction
+  update_supplier_transaction(transaction_id: Int!, transaction_date: String): SupplierTransaction
+  delete_supplier_transaction(transaction_id: Int!): SupplierTransaction
+  create_consumer_transaction(consumer_id: Int!, order_id: Int!, transaction_date: String!): ConsumerTransaction
+  update_consumer_transaction(transaction_id: Int!, transaction_date: String): ConsumerTransaction
+  delete_consumer_transaction(transaction_id: Int!): ConsumerTransaction
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}
